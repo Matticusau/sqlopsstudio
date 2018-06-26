@@ -6,14 +6,12 @@
 import { NgModule, Inject, forwardRef, ApplicationRef, ComponentFactoryResolver, Type } from '@angular/core';
 import { APP_BASE_HREF, CommonModule } from '@angular/common';
 import { BrowserModule } from '@angular/platform-browser';
+import { IBootstrapParams } from 'sql/services/bootstrap/bootstrapService';
 
-import { IBootstrapParams, providerIterator } from 'sql/services/bootstrap/bootstrapService';
-import { CreateLoginComponent } from 'sql/parts/admin/security/createLogin.component';
-
-import { IInstantiationService } from 'vs/platform/instantiation/common/instantiation';
+import { CreateLoginComponent, CREATELOGIN_SELECTOR } from 'sql/parts/admin/security/createLogin.component';
 
 // Connection Dashboard main angular module
-export const CreateLoginModule = (params: IBootstrapParams, selector: string, instantiationService: IInstantiationService): Type<any> => {
+export const CreateLoginModule = (params: IBootstrapParams, selector: string): Type<any> => {
 
 	@NgModule({
 		declarations: [
@@ -26,8 +24,7 @@ export const CreateLoginModule = (params: IBootstrapParams, selector: string, in
 		],
 		providers: [
 			{ provide: APP_BASE_HREF, useValue: '/' },
-			{ provide: IBootstrapParams, useValue: params },
-			...providerIterator(instantiationService)
+			{ provide: IBootstrapParams, useValue: params }
 		]
 	})
 	class ModuleClass {

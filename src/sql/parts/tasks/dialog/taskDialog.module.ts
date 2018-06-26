@@ -12,11 +12,9 @@ import { APP_BASE_HREF, CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { BrowserModule } from '@angular/platform-browser';
 
-import { IInstantiationService } from 'vs/platform/instantiation/common/instantiation';
-
-import { TaskDialogComponent } from 'sql/parts/tasks/dialog/taskDialog.component';
+import { TaskDialogComponent, TASKDIALOG_SELECTOR } from 'sql/parts/tasks/dialog/taskDialog.component';
 import { CreateDatabaseComponent } from 'sql/parts/admin/database/create/createDatabase.component';
-import { IBootstrapParams, ISelector, providerIterator } from 'sql/services/bootstrap/bootstrapService';
+import { IBootstrapParams } from 'sql/services/bootstrap/bootstrapService';
 
 // Setup routes for various child components
 const appRoutes: Routes = [
@@ -29,7 +27,7 @@ const appRoutes: Routes = [
 	{ path: '**', component: CreateDatabaseComponent }
 ];
 
-export const TaskDialogModule = (params: IBootstrapParams, selector: string, instantiationService: IInstantiationService): Type<any> => {
+export const TaskDialogModule = (params: IBootstrapParams, selector: string): Type<any> => {
 	@NgModule({
 		declarations: [
 			TaskDialogComponent,
@@ -44,22 +42,19 @@ export const TaskDialogModule = (params: IBootstrapParams, selector: string, ins
 		],
 		providers: [
 			{ provide: APP_BASE_HREF, useValue: '/' },
-			{ provide: IBootstrapParams, useValue: params },
-			{ provide: ISelector, useValue: selector },
-			...providerIterator(instantiationService)
+			{ provide: IBootstrapParams, useValue: params }
 		]
 	})
 	class ModuleClass {
 
 		constructor(
-			@Inject(forwardRef(() => ComponentFactoryResolver)) private _resolver: ComponentFactoryResolver,
-			@Inject(ISelector) private selector: string
+			@Inject(forwardRef(() => ComponentFactoryResolver)) private _resolver: ComponentFactoryResolver
 		) {
 		}
 
 		ngDoBootstrap(appRef: ApplicationRef) {
 			const factory = this._resolver.resolveComponentFactory(TaskDialogComponent);
-			(<any>factory).factory.selector = this.selector;
+			(<any>factory).factory.selector = selector;
 			appRef.bootstrap(factory);
 		}
 	}

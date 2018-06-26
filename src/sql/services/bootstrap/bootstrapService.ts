@@ -3,31 +3,20 @@
  *  Licensed under the Source EULA. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { NgModuleRef, enableProdMode, InjectionToken, Type, PlatformRef, Provider, Injector, Optional, Inject, ComponentFactoryResolver } from '@angular/core';
+import { NgModuleRef, enableProdMode, InjectionToken, ReflectiveInjector, Type, PlatformRef, Provider } from '@angular/core';
 import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
 
 import { IEditorInput } from 'vs/platform/editor/common/editor';
 import { IInstantiationService, _util } from 'vs/platform/instantiation/common/instantiation';
 
 const selectorCounter = new Map<string, number>();
+const serviceMap = new Map<string, IInstantiationService>();
 
-export function providerIterator(service: IInstantiationService): Provider[] {
-	return Array.from(_util.serviceIds.values()).map(v => {
-		return {
-			provide: v, useFactory: () => {
-				return (<any>service)._getOrCreateServiceInstance(v);
-			}
-		};
-	});
-}
-
-export const ISelector = new InjectionToken<string>('selector');
-
-export const IBootstrapParams = new InjectionToken<IBootstrapParams>('bootstrap_params');
+export const IBootstrapParams = new InjectionToken('bootstrap_params');
 export interface IBootstrapParams {
 }
 
-export type IModuleFactory<T> = (params: IBootstrapParams, selector: string, service: IInstantiationService) => Type<T>;
+export type IModuleFactory<T> = (params: IBootstrapParams, selector: string) => Type<T>;
 
 function createUniqueSelector(selector: string): string {
 	let num: number;
@@ -48,13 +37,31 @@ export function bootstrapAngular<T>(service: IInstantiationService, moduleType: 
 	let selector = document.createElement(uniqueSelectorString);
 	container.appendChild(selector);
 
+	serviceMap.set(uniqueSelectorString, service);
+
 	if (!platform) {
-		platform = platformBrowserDynamic();
+		// Perform the bootsrap
+
+		const providers: Provider = [];
+
+		_util.serviceIds.forEach(id => {
+			providers.push({
+				provide: id, useFactory: () => {
+					return (<any>serviceMap.get(uniqueSelectorString))._getOrCreateServiceInstance(id);
+				}
+			});
+		});
+
+		platform = platformBrowserDynamic(providers);
 	}
 
-	platform.bootstrapModule(moduleType(params, uniqueSelectorString, service)).then(moduleRef => {
+	platform.bootstrapModule(moduleType(params, uniqueSelectorString)).then(moduleRef => {
 		if (input) {
 			input.onDispose(() => {
+				serviceMap.delete(uniqueSelectorString);
+				moduleRef.onDestroy(() => {
+					serviceMap.delete(uniqueSelectorString);
+				});
 				moduleRef.destroy();
 			});
 		}

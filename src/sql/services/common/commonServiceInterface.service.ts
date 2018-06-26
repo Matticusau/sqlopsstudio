@@ -95,6 +95,7 @@ export class SingleQueryManagementService {
 */
 @Injectable()
 export class CommonServiceInterface extends AngularDisposable {
+	protected _uniqueSelector: string;
 	protected _uri: string;
 
 	/* Special Services */
@@ -114,12 +115,6 @@ export class CommonServiceInterface extends AngularDisposable {
 		@Inject(IQueryManagementService) protected _queryManagementService: IQueryManagementService
 	) {
 		super();
-		// during testing there may not be params
-		if (this._params) {
-			this.scopedContextKeyService = this._params.scopedContextService;
-			this._connectionContextKey = this._params.connectionContextKey;
-			this.uri = this._params.ownerUri;
-		}
 	}
 
 	public get metadataService(): SingleConnectionMetadataService {
@@ -136,6 +131,20 @@ export class CommonServiceInterface extends AngularDisposable {
 
 	public get queryManagementService(): SingleQueryManagementService {
 		return this._singleQueryManagementService;
+	}
+
+	/**
+	 * Set the selector for this instance, should only be set once
+	 */
+	public set selector(selector: string) {
+		this._uniqueSelector = selector;
+		this._getbootstrapParams();
+	}
+
+	protected _getbootstrapParams(): void {
+		this.scopedContextKeyService = this._params.scopedContextService;
+		this._connectionContextKey = this._params.connectionContextKey;
+		this.uri = this._params.ownerUri;
 	}
 
 	protected setUri(uri: string) {
