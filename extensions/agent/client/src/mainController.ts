@@ -36,6 +36,7 @@ export class MainController {
 			let dialog = new CreateStepDialog(ownerUri, jobId, server);
 			dialog.openNewStepDialog();
 		});
+
 	}
 
 	 private updateJobStepDialog() {

@@ -635,6 +635,7 @@ declare module 'sqlops' {
 		runQueryStatement(ownerUri: string, line: number, column: number): Thenable<void>;
 		runQueryString(ownerUri: string, queryString: string): Thenable<void>;
 		runQueryAndReturn(ownerUri: string, queryString: string, isParse: boolean): Thenable<SimpleExecuteResult>;
+		parseSyntax(ownerUri: string, query: string): Thenable<SyntaxParseResult>;
 		getQueryRows(rowData: QueryExecuteSubsetParams): Thenable<QueryExecuteSubsetResult>;
 		disposeQuery(ownerUri: string): Thenable<void>;
 		saveResults(requestParams: SaveResultsRequestParams): Thenable<SaveResultRequestResult>;
@@ -769,6 +770,11 @@ declare module 'sqlops' {
 		columnInfo: IDbColumn[];
 		rows: DbCellValue[][];
 		parseable: boolean;
+	}
+
+	export interface SyntaxParseResult {
+		parseable: boolean;
+		errorMessages: string[];
 	}
 
 	// Query Batch Notification -----------------------------------------------------------------------
